@@ -1,3 +1,3 @@
-# Minesweeper
+# Snake
 
 Built with Typescript.
