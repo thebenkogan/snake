@@ -9,7 +9,7 @@ canvas.height = height;
 const snakeColor = "#1874E9";
 const blankColor = "#181818";
 const foodColor = "#4bf542";
-const speed = 100; // ms delay between each snake movement
+const speed = 75; // ms delay between each snake movement
 // get grid and border dimensions
 let cols = 50; // temp column count
 let rows = 30; // temp row count
@@ -45,30 +45,37 @@ ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
 // }
 let dirX = 0; // 1 = right, -1 = left, 0 = rest
 let dirY = 0; // -1 = up, 1 = down, 0 = rest
+let moveQueue = [];
+let tmpX = 0;
+let tmpY = 0;
 window.addEventListener("keydown", (e) => {
     switch (e.key) {
         case "ArrowUp":
-            if (dirY != 1) {
-                dirX = 0;
-                dirY = -1;
+            if (tmpY != 1) {
+                moveQueue.push({ x: 0, y: -1 });
+                tmpX = 0;
+                tmpY = -1;
             }
             break;
         case "ArrowDown":
-            if (dirY != -1) {
-                dirX = 0;
-                dirY = 1;
+            if (tmpY != -1) {
+                moveQueue.push({ x: 0, y: 1 });
+                tmpX = 0;
+                tmpY = 1;
             }
             break;
         case "ArrowLeft":
-            if (dirX != 1) {
-                dirX = -1;
-                dirY = 0;
+            if (tmpX != 1) {
+                moveQueue.push({ x: -1, y: 0 });
+                tmpX = -1;
+                tmpY = 0;
             }
             break;
         case "ArrowRight":
-            if (dirX != -1) {
-                dirX = 1;
-                dirY = 0;
+            if (tmpX != -1) {
+                moveQueue.push({ x: 1, y: 0 });
+                tmpX = 1;
+                tmpY = 0;
             }
             break;
         default:
@@ -98,6 +105,11 @@ let foodX = 0;
 let foodY = 0;
 genFood();
 const interval = setInterval(() => {
+    if (moveQueue.length > 0) {
+        const newDir = moveQueue.shift();
+        dirX = newDir.x;
+        dirY = newDir.y;
+    }
     if (dirX == 0 && dirY == 0)
         return;
     const nextX = head.x + dirX;
@@ -173,6 +185,7 @@ function gameOver() {
     ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
     dirX = 0;
     dirY = 0;
+    moveQueue = [];
     head = {
         x: Math.floor(cols / 2),
         y: Math.floor(rows / 2),
