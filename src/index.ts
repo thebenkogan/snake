@@ -51,6 +51,10 @@ ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
 //   ctx.stroke();
 // }
 
+function posToString([x, y]: number[]): string {
+  return `${x}_${y}`;
+}
+
 let dirX = 0; // 1 = right, -1 = left, 0 = rest
 let dirY = 0; // -1 = up, 1 = down, 0 = rest
 
@@ -107,11 +111,13 @@ interface Snake {
   next: Snake;
 }
 
+let body = new Set<string>();
 let head: Snake = {
   x: Math.floor(cols / 2),
   y: Math.floor(rows / 2),
   next: null,
 };
+body.add(posToString([head.x, head.y]));
 let tail: Snake = head;
 let growLen = 5;
 let len = 1;
@@ -141,21 +147,8 @@ const interval = setInterval(() => {
     return;
   }
 
-  // game over if hits snake body
-  let tmp: Snake = state ? tail.next : tail;
-  while (tmp != null) {
-    if (tmp.x == nextX && tmp.y == nextY) {
-      gameOver();
-      return;
-    }
-    tmp = tmp.next;
-  }
-
-  const next: Snake = { x: nextX, y: nextY, next: null };
-  head.next = next;
-  head = next;
-
   if (state) {
+    body.delete(posToString([tail.x, tail.y]));
     drawSnake(tail, true);
     tail = tail.next;
   } else {
@@ -165,6 +158,17 @@ const interval = setInterval(() => {
       len++;
     }
   }
+
+  // game over if hits snake body
+  if (body.has(posToString([nextX, nextY]))) {
+    gameOver();
+    return;
+  }
+
+  const next: Snake = { x: nextX, y: nextY, next: null };
+  head.next = next;
+  head = next;
+  body.add(posToString([head.x, head.y]));
 
   if (nextX == foodX && nextY == foodY) {
     genFood();
@@ -186,16 +190,7 @@ function genFood() {
   while (!valid) {
     nextX = Math.floor(Math.random() * cols);
     nextY = Math.floor(Math.random() * rows);
-
-    let tmp: Snake = tail;
-    valid = true;
-    while (tmp != null) {
-      if (tmp.x == nextX && tmp.y == nextY) {
-        valid = false;
-        break;
-      }
-      tmp = tmp.next;
-    }
+    valid = !body.has(posToString([nextX, nextY]));
   }
 
   ctx.fillStyle = foodColor;
@@ -223,12 +218,15 @@ function gameOver() {
   tmpY = 0;
   moveQueue = [];
 
+  body.clear();
+
   head = {
     x: Math.floor(cols / 2),
     y: Math.floor(rows / 2),
     next: null,
   };
   tail = head;
+  body.add(posToString([head.x, head.y]));
   growLen = foodLen;
   len = 1;
 
