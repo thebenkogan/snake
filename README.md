@@ -1,3 +1,3 @@
 # Snake
 
-Built with Typescript.
+http://snake.benkogan.io/
