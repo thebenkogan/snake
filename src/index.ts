@@ -12,11 +12,12 @@ const snakeColor = "#1874E9";
 const blankColor = "#181818";
 const foodColor = "#4bf542";
 
-const speed = 75; // ms delay between each snake movement
+const speed = 90; // ms delay between each snake movement
+const foodLen = 5; // length gained by eating food
 
 // get grid and border dimensions
-let cols = 50; // temp column count
-let rows = 30; // temp row count
+let cols = 30; // temp column count
+let rows = 20; // temp row count
 const Xstep = width / cols;
 const Ystep = height / rows;
 const step = (Xstep + Ystep) / 2;
@@ -150,12 +151,6 @@ const interval = setInterval(() => {
     tmp = tmp.next;
   }
 
-  if (nextX == foodX && nextY == foodY) {
-    genFood();
-    state = false;
-    growLen += 5;
-  }
-
   const next: Snake = { x: nextX, y: nextY, next: null };
   head.next = next;
   head = next;
@@ -170,6 +165,13 @@ const interval = setInterval(() => {
       len++;
     }
   }
+
+  if (nextX == foodX && nextY == foodY) {
+    genFood();
+    state = false;
+    growLen += foodLen - 1;
+  }
+
   drawSnake(head); // draw head after tail for tail following
 }, speed);
 
@@ -185,7 +187,7 @@ function genFood() {
     nextX = Math.floor(Math.random() * cols);
     nextY = Math.floor(Math.random() * rows);
 
-    let tmp: Snake = state ? tail.next : tail;
+    let tmp: Snake = tail;
     valid = true;
     while (tmp != null) {
       if (tmp.x == nextX && tmp.y == nextY) {
@@ -196,12 +198,11 @@ function genFood() {
     }
   }
 
-  // why isn't there a fillCircle function?
   ctx.fillStyle = foodColor;
   ctx.beginPath();
   ctx.arc(
-    nextX * step + (3 / 4) * step, // don't ask
-    nextY * step + (7 / 8) * step, // don't ask
+    hb + nextX * step + step / 2,
+    vb + nextY * step + step / 2,
     step / 2 - 3,
     0,
     2 * Math.PI
@@ -218,6 +219,8 @@ function gameOver() {
 
   dirX = 0;
   dirY = 0;
+  tmpX = 0;
+  tmpY = 0;
   moveQueue = [];
 
   head = {
@@ -226,7 +229,7 @@ function gameOver() {
     next: null,
   };
   tail = head;
-  growLen = 5;
+  growLen = foodLen;
   len = 1;
 
   drawSnake(head);
