@@ -12,12 +12,12 @@ const snakeColor = "#1874E9";
 const blankColor = "#181818";
 const foodColor = "#4bf542";
 
-const speed = 90; // ms delay between each snake movement
+const speed = 95; // ms delay between each snake movement
 const foodLen = 5; // length gained by eating food
 
 // get grid and border dimensions
-let cols = 30; // temp column count
-let rows = 20; // temp row count
+let cols = 25; // temp column count
+let rows = 25; // temp row count
 const Xstep = width / cols;
 const Ystep = height / rows;
 const step = (Xstep + Ystep) / 2;
