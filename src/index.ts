@@ -77,7 +77,7 @@ interface Snake {
   next: Snake;
 }
 
-let body: Set<string> = new Set<string>(); // stores all snake nodes, O(1) lookup
+let body: Set<string> = new Set<string>(); // stores all snake node positions, O(1) lookup
 let head: Snake; // head node
 let tail: Snake; // tail node
 
