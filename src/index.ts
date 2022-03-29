@@ -1,6 +1,7 @@
 const div = document.getElementById("snake") as HTMLDivElement;
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+const select = document.getElementById("difficulty") as HTMLSelectElement;
 
 const width = div.clientWidth;
 const height = div.clientHeight;
@@ -12,12 +13,23 @@ const snakeColor = "#1874E9";
 const blankColor = "#181818";
 const foodColor = "#4bf542";
 
-const speed = 95; // ms delay between each snake movement
+let speed = 80; // ms delay between each snake movement
+
+let interval = setInterval(move, speed);
+
+select.onchange = () => {
+  const newSpeed =
+    select.value == "easy" ? 110 : select.value == "medium" ? 80 : 50;
+  clearInterval(interval);
+  interval = setInterval(move, newSpeed);
+  gameOver();
+};
+
 const foodLen = 5; // length gained by eating food
 
 // get grid and border dimensions
-let cols = 25; // temp column count
-let rows = 25; // temp row count
+let cols = 40; // temp column count
+let rows = 20; // temp row count
 const Xstep = width / cols;
 const Ystep = height / rows;
 const step = (Xstep + Ystep) / 2;
@@ -129,9 +141,12 @@ let foodX = 0;
 let foodY = 0;
 genFood();
 
-const interval = setInterval(() => {
+function move() {
   if (moveQueue.length > 0) {
-    const newDir = moveQueue.shift();
+    let newDir = moveQueue.shift();
+    while (newDir.x == dirX && newDir.y == dirY && moveQueue.length > 0) {
+      newDir = moveQueue.shift();
+    }
     dirX = newDir.x;
     dirY = newDir.y;
   }
@@ -177,7 +192,7 @@ const interval = setInterval(() => {
   }
 
   drawSnake(head); // draw head after tail for tail following
-}, speed);
+}
 
 // draws new random food and clears old one
 function genFood() {

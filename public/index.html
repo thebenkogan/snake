@@ -8,8 +8,17 @@
     <title>Snake</title>
   </head>
   <body>
-    <div id="snake">
-      <canvas id="canvas"></canvas>
+    <div id="wrapper">
+      <div id="top">
+        <select id="difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+      <div id="snake">
+        <canvas id="canvas"></canvas>
+      </div>
     </div>
     <script src="index.js"></script>
   </body>
