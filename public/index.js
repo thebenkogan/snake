@@ -10,12 +10,11 @@ canvas.height = height;
 const snakeColor = "#1874E9";
 const blankColor = "#181818";
 const foodColor = "#4bf542";
-let speed = 80; // ms delay between each snake movement
+let speed = +select.value; // ms delay between each snake movement
 let interval = setInterval(move, speed);
 select.onchange = () => {
-    const newSpeed = select.value == "easy" ? 110 : select.value == "medium" ? 80 : 50;
     clearInterval(interval);
-    interval = setInterval(move, newSpeed);
+    interval = setInterval(move, +select.value);
     gameOver();
 };
 const foodLen = 5; // length gained by eating food
