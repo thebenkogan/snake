@@ -5,7 +5,6 @@ const select = document.getElementById("difficulty") as HTMLSelectElement;
 
 const width = div.clientWidth;
 const height = div.clientHeight;
-
 canvas.width = width;
 canvas.height = height;
 
@@ -20,7 +19,7 @@ let interval = setInterval(move, speed);
 select.onchange = () => {
   clearInterval(interval);
   interval = setInterval(move, +select.value);
-  gameOver();
+  setup();
 };
 
 const foodLen = 5; // length gained by eating food
@@ -45,7 +44,7 @@ ctx.fillRect(0, height - vb, width, vb);
 ctx.fillStyle = blankColor;
 ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
 
-// draw grid
+// uncomment to draw underlying grid
 // ctx.strokeStyle = "#000000";
 // ctx.lineWidth = 1;
 // for (let i = 0; i < rows; i++) {
@@ -65,12 +64,61 @@ function posToString([x, y]: number[]): string {
   return `${x}_${y}`;
 }
 
-let dirX = 0; // 1 = right, -1 = left, 0 = rest
-let dirY = 0; // -1 = up, 1 = down, 0 = rest
+let dirX: number; // current X direction of snake
+let dirY: number; // current Y direction of snake
+let tmpX: number; // updated X direction after queued moves
+let tmpY: number; // updated Y direction after queued moves
+let moveQueue: { x: number; y: number }[] = []; // stores all user inputs
 
-let moveQueue = [] as { x: number; y: number }[];
-let tmpX = 0;
-let tmpY = 0;
+// Snake node: (x, y) = position on grid, next = next node towards head
+interface Snake {
+  x: number;
+  y: number;
+  next: Snake;
+}
+
+let body: Set<string> = new Set<string>(); // stores all snake nodes, O(1) lookup
+let head: Snake; // head node
+let tail: Snake; // tail node
+
+let state: boolean; // false = growing, true = steady
+let growLen: number; // target length of snake
+let len: number; // current length of snake
+let foodX: number; // food X position
+let foodY: number; // food Y position
+
+function setup() {
+  ctx.fillStyle = blankColor;
+  ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
+
+  dirX = 0;
+  dirY = 0;
+  tmpX = 0;
+  tmpY = 0;
+  moveQueue = [];
+
+  body.clear();
+
+  head = {
+    x: Math.floor(cols / 2),
+    y: Math.floor(rows / 2),
+    next: null,
+  };
+  tail = head;
+  body.add(posToString([head.x, head.y]));
+  growLen = foodLen;
+  len = 1;
+
+  drawSnake(head);
+  state = false;
+
+  foodX = 0;
+  foodY = 0;
+  genFood();
+}
+
+setup();
+
 window.addEventListener("keydown", (e: KeyboardEvent) => {
   switch (e.key) {
     case "ArrowUp":
@@ -115,30 +163,6 @@ function drawSnake(s: Snake, c = false) {
   }
 }
 
-interface Snake {
-  x: number;
-  y: number;
-  next: Snake;
-}
-
-let body = new Set<string>();
-let head: Snake = {
-  x: Math.floor(cols / 2),
-  y: Math.floor(rows / 2),
-  next: null,
-};
-body.add(posToString([head.x, head.y]));
-let tail: Snake = head;
-let growLen = 5;
-let len = 1;
-
-drawSnake(head);
-let state = false; // false = growing, true = steady
-
-let foodX = 0;
-let foodY = 0;
-genFood();
-
 function move() {
   if (moveQueue.length > 0) {
     let newDir = moveQueue.shift();
@@ -156,7 +180,7 @@ function move() {
 
   // game over if hits walls
   if (nextX == cols || nextX == -1 || nextY == rows || nextY == -1) {
-    gameOver();
+    setup();
     return;
   }
 
@@ -174,7 +198,7 @@ function move() {
 
   // game over if hits snake body
   if (body.has(posToString([nextX, nextY]))) {
-    gameOver();
+    setup();
     return;
   }
 
@@ -219,32 +243,4 @@ function genFood() {
 
   foodX = nextX;
   foodY = nextY;
-}
-
-function gameOver() {
-  ctx.fillStyle = blankColor;
-  ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
-
-  dirX = 0;
-  dirY = 0;
-  tmpX = 0;
-  tmpY = 0;
-  moveQueue = [];
-
-  body.clear();
-
-  head = {
-    x: Math.floor(cols / 2),
-    y: Math.floor(rows / 2),
-    next: null,
-  };
-  tail = head;
-  body.add(posToString([head.x, head.y]));
-  growLen = foodLen;
-  len = 1;
-
-  drawSnake(head);
-  state = false;
-
-  genFood();
 }

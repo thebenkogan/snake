@@ -15,7 +15,7 @@ let interval = setInterval(move, speed);
 select.onchange = () => {
     clearInterval(interval);
     interval = setInterval(move, +select.value);
-    gameOver();
+    setup();
 };
 const foodLen = 5; // length gained by eating food
 // get grid and border dimensions
@@ -36,7 +36,7 @@ ctx.fillRect(0, 0, width, vb);
 ctx.fillRect(0, height - vb, width, vb);
 ctx.fillStyle = blankColor;
 ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
-// draw grid
+// uncomment to draw underlying grid
 // ctx.strokeStyle = "#000000";
 // ctx.lineWidth = 1;
 // for (let i = 0; i < rows; i++) {
@@ -54,11 +54,44 @@ ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
 function posToString([x, y]) {
     return `${x}_${y}`;
 }
-let dirX = 0; // 1 = right, -1 = left, 0 = rest
-let dirY = 0; // -1 = up, 1 = down, 0 = rest
-let moveQueue = [];
-let tmpX = 0;
-let tmpY = 0;
+let dirX; // current X direction of snake
+let dirY; // current Y direction of snake
+let tmpX; // updated X direction after queued moves
+let tmpY; // updated Y direction after queued moves
+let moveQueue = []; // stores all user inputs
+let body = new Set(); // stores all snake nodes, O(1) lookup
+let head; // head node
+let tail; // tail node
+let state; // false = growing, true = steady
+let growLen; // target length of snake
+let len; // current length of snake
+let foodX; // food X position
+let foodY; // food Y position
+function setup() {
+    ctx.fillStyle = blankColor;
+    ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
+    dirX = 0;
+    dirY = 0;
+    tmpX = 0;
+    tmpY = 0;
+    moveQueue = [];
+    body.clear();
+    head = {
+        x: Math.floor(cols / 2),
+        y: Math.floor(rows / 2),
+        next: null,
+    };
+    tail = head;
+    body.add(posToString([head.x, head.y]));
+    growLen = foodLen;
+    len = 1;
+    drawSnake(head);
+    state = false;
+    foodX = 0;
+    foodY = 0;
+    genFood();
+}
+setup();
 window.addEventListener("keydown", (e) => {
     switch (e.key) {
         case "ArrowUp":
@@ -102,21 +135,6 @@ function drawSnake(s, c = false) {
         ctx.fillRect(hb + s.x * step + 1, vb + s.y * step + 1, step - 2, step - 2);
     }
 }
-let body = new Set();
-let head = {
-    x: Math.floor(cols / 2),
-    y: Math.floor(rows / 2),
-    next: null,
-};
-body.add(posToString([head.x, head.y]));
-let tail = head;
-let growLen = 5;
-let len = 1;
-drawSnake(head);
-let state = false; // false = growing, true = steady
-let foodX = 0;
-let foodY = 0;
-genFood();
 function move() {
     if (moveQueue.length > 0) {
         let newDir = moveQueue.shift();
@@ -132,7 +150,7 @@ function move() {
     const nextY = head.y + dirY;
     // game over if hits walls
     if (nextX == cols || nextX == -1 || nextY == rows || nextY == -1) {
-        gameOver();
+        setup();
         return;
     }
     if (state) {
@@ -150,7 +168,7 @@ function move() {
     }
     // game over if hits snake body
     if (body.has(posToString([nextX, nextY]))) {
-        gameOver();
+        setup();
         return;
     }
     const next = { x: nextX, y: nextY, next: null };
@@ -182,26 +200,4 @@ function genFood() {
     ctx.fill();
     foodX = nextX;
     foodY = nextY;
-}
-function gameOver() {
-    ctx.fillStyle = blankColor;
-    ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
-    dirX = 0;
-    dirY = 0;
-    tmpX = 0;
-    tmpY = 0;
-    moveQueue = [];
-    body.clear();
-    head = {
-        x: Math.floor(cols / 2),
-        y: Math.floor(rows / 2),
-        next: null,
-    };
-    tail = head;
-    body.add(posToString([head.x, head.y]));
-    growLen = foodLen;
-    len = 1;
-    drawSnake(head);
-    state = false;
-    genFood();
 }
