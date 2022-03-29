@@ -20,6 +20,7 @@ select.onchange = () => {
   clearInterval(interval);
   interval = setInterval(move, +select.value);
   setup();
+  select.blur();
 };
 
 const foodLen = 5; // length gained by eating food

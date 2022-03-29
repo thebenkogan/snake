@@ -16,6 +16,7 @@ select.onchange = () => {
     clearInterval(interval);
     interval = setInterval(move, +select.value);
     setup();
+    select.blur();
 };
 const foodLen = 5; // length gained by eating food
 // get grid and border dimensions
@@ -59,7 +60,7 @@ let dirY; // current Y direction of snake
 let tmpX; // updated X direction after queued moves
 let tmpY; // updated Y direction after queued moves
 let moveQueue = []; // stores all user inputs
-let body = new Set(); // stores all snake nodes, O(1) lookup
+let body = new Set(); // stores all snake node positions, O(1) lookup
 let head; // head node
 let tail; // tail node
 let state; // false = growing, true = steady
