@@ -1,6 +1,8 @@
 const div = document.getElementById("snake") as HTMLDivElement;
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+const ctx = canvas.getContext("2d", {
+  alpha: false,
+}) as CanvasRenderingContext2D;
 const select = document.getElementById("difficulty") as HTMLSelectElement;
 
 const width = div.clientWidth;
@@ -8,7 +10,8 @@ const height = div.clientHeight;
 canvas.width = width;
 canvas.height = height;
 
-const snakeColor = "#1874E9";
+const snakeColor = "#5591f2";
+const headColor = "#0f5cd9";
 const blankColor = "#181818";
 const foodColor = "#4bf542";
 
@@ -110,7 +113,7 @@ function setup() {
   growLen = foodLen;
   len = 1;
 
-  drawSnake(head);
+  drawSnake(head, headColor);
   state = false;
 
   foodX = 0;
@@ -155,8 +158,9 @@ window.addEventListener("keydown", (e: KeyboardEvent) => {
   }
 });
 
-function drawSnake(s: Snake, c = false) {
-  ctx.fillStyle = !c ? snakeColor : blankColor;
+// draws snake square with fill color, blank square if c == true
+function drawSnake(s: Snake, fill: string, c = false) {
+  ctx.fillStyle = !c ? fill : blankColor;
   if (c) {
     ctx.fillRect(hb + s.x * step, vb + s.y * step, step, step);
   } else {
@@ -187,7 +191,7 @@ function move() {
 
   if (state) {
     body.delete(posToString([tail.x, tail.y]));
-    drawSnake(tail, true);
+    drawSnake(tail, snakeColor, true);
     tail = tail.next;
   } else {
     if (len == growLen) {
@@ -203,6 +207,8 @@ function move() {
     return;
   }
 
+  drawSnake(head, snakeColor); // move old head color to body color
+
   const next: Snake = { x: nextX, y: nextY, next: null };
   head.next = next;
   head = next;
@@ -214,7 +220,7 @@ function move() {
     growLen += foodLen - 1;
   }
 
-  drawSnake(head); // draw head after tail for tail following
+  drawSnake(head, headColor); // draw head after tail for tail following
 }
 
 // draws new random food and clears old one

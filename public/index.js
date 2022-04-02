@@ -1,13 +1,16 @@
 "use strict";
 const div = document.getElementById("snake");
 const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d", {
+    alpha: false,
+});
 const select = document.getElementById("difficulty");
 const width = div.clientWidth;
 const height = div.clientHeight;
 canvas.width = width;
 canvas.height = height;
-const snakeColor = "#1874E9";
+const snakeColor = "#5591f2";
+const headColor = "#0f5cd9";
 const blankColor = "#181818";
 const foodColor = "#4bf542";
 let speed = +select.value; // ms delay between each snake movement
@@ -86,7 +89,7 @@ function setup() {
     body.add(posToString([head.x, head.y]));
     growLen = foodLen;
     len = 1;
-    drawSnake(head);
+    drawSnake(head, headColor);
     state = false;
     foodX = 0;
     foodY = 0;
@@ -127,8 +130,9 @@ window.addEventListener("keydown", (e) => {
             break;
     }
 });
-function drawSnake(s, c = false) {
-    ctx.fillStyle = !c ? snakeColor : blankColor;
+// draws snake square with fill color, blank square if c == true
+function drawSnake(s, fill, c = false) {
+    ctx.fillStyle = !c ? fill : blankColor;
     if (c) {
         ctx.fillRect(hb + s.x * step, vb + s.y * step, step, step);
     }
@@ -156,7 +160,7 @@ function move() {
     }
     if (state) {
         body.delete(posToString([tail.x, tail.y]));
-        drawSnake(tail, true);
+        drawSnake(tail, snakeColor, true);
         tail = tail.next;
     }
     else {
@@ -172,6 +176,7 @@ function move() {
         setup();
         return;
     }
+    drawSnake(head, snakeColor); // move old head color to body color
     const next = { x: nextX, y: nextY, next: null };
     head.next = next;
     head = next;
@@ -181,7 +186,7 @@ function move() {
         state = false;
         growLen += foodLen - 1;
     }
-    drawSnake(head); // draw head after tail for tail following
+    drawSnake(head, headColor); // draw head after tail for tail following
 }
 // draws new random food and clears old one
 function genFood() {
