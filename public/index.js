@@ -63,7 +63,8 @@ let dirY; // current Y direction of snake
 let tmpX; // updated X direction after queued moves
 let tmpY; // updated Y direction after queued moves
 let moveQueue = []; // stores all user inputs
-let body = new Set(); // stores all snake node positions, O(1) lookup
+// stores all snake node positions, O(1) lookup
+const body = Array.from(Array(cols), (_) => Array(rows).fill(false));
 let head; // head node
 let tail; // tail node
 let state; // false = growing, true = steady
@@ -79,14 +80,14 @@ function setup() {
     tmpX = 0;
     tmpY = 0;
     moveQueue = [];
-    body.clear();
+    Array.from(body, (sub) => sub.fill(false));
     head = {
         x: Math.floor(cols / 2),
         y: Math.floor(rows / 2),
         next: null,
     };
     tail = head;
-    body.add(posToString([head.x, head.y]));
+    body[head.x][head.y] = true;
     growLen = foodLen;
     len = 1;
     drawSnake(head, headColor);
@@ -159,7 +160,7 @@ function move() {
         return;
     }
     if (state) {
-        body.delete(posToString([tail.x, tail.y]));
+        body[tail.x][tail.y] = false;
         drawSnake(tail, snakeColor, true);
         tail = tail.next;
     }
@@ -167,12 +168,10 @@ function move() {
         if (len == growLen) {
             state = true;
         }
-        else {
-            len++;
-        }
+        len++;
     }
     // game over if hits snake body
-    if (body.has(posToString([nextX, nextY]))) {
+    if (body[nextX][nextY]) {
         setup();
         return;
     }
@@ -180,7 +179,7 @@ function move() {
     const next = { x: nextX, y: nextY, next: null };
     head.next = next;
     head = next;
-    body.add(posToString([head.x, head.y]));
+    body[head.x][head.y] = true;
     if (nextX == foodX && nextY == foodY) {
         genFood();
         state = false;
@@ -198,7 +197,7 @@ function genFood() {
     while (!valid) {
         nextX = Math.floor(Math.random() * cols);
         nextY = Math.floor(Math.random() * rows);
-        valid = !body.has(posToString([nextX, nextY]));
+        valid = !body[nextX][nextY];
     }
     ctx.fillStyle = foodColor;
     ctx.beginPath();
