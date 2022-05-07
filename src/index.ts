@@ -64,10 +64,6 @@ ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
 //   ctx.stroke();
 // }
 
-function posToString([x, y]: number[]): string {
-  return `${x}_${y}`;
-}
-
 let dirX: number; // current X direction of snake
 let dirY: number; // current Y direction of snake
 let tmpX: number; // updated X direction after queued moves

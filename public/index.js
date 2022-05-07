@@ -55,9 +55,6 @@ ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
 //   ctx.lineTo(hb + i * step, height - vb);
 //   ctx.stroke();
 // }
-function posToString([x, y]) {
-    return `${x}_${y}`;
-}
 let dirX; // current X direction of snake
 let dirY; // current Y direction of snake
 let tmpX; // updated X direction after queued moves
