@@ -81,7 +81,10 @@ interface Snake {
   next: Snake;
 }
 
-let body: Set<string> = new Set<string>(); // stores all snake node positions, O(1) lookup
+// stores all snake node positions, O(1) lookup
+const body: Array<Array<boolean>> = Array.from(Array(cols), (_) =>
+  Array(rows).fill(false)
+);
 let head: Snake; // head node
 let tail: Snake; // tail node
 
@@ -101,7 +104,7 @@ function setup() {
   tmpY = 0;
   moveQueue = [];
 
-  body.clear();
+  Array.from(body, (sub) => sub.fill(false));
 
   head = {
     x: Math.floor(cols / 2),
@@ -109,7 +112,7 @@ function setup() {
     next: null,
   };
   tail = head;
-  body.add(posToString([head.x, head.y]));
+  body[head.x][head.y] = true;
   growLen = foodLen;
   len = 1;
 
@@ -190,19 +193,18 @@ function move() {
   }
 
   if (state) {
-    body.delete(posToString([tail.x, tail.y]));
+    body[tail.x][tail.y] = false;
     drawSnake(tail, snakeColor, true);
     tail = tail.next;
   } else {
     if (len == growLen) {
       state = true;
-    } else {
-      len++;
     }
+    len++;
   }
 
   // game over if hits snake body
-  if (body.has(posToString([nextX, nextY]))) {
+  if (body[nextX][nextY]) {
     setup();
     return;
   }
@@ -212,7 +214,7 @@ function move() {
   const next: Snake = { x: nextX, y: nextY, next: null };
   head.next = next;
   head = next;
-  body.add(posToString([head.x, head.y]));
+  body[head.x][head.y] = true;
 
   if (nextX == foodX && nextY == foodY) {
     genFood();
@@ -234,7 +236,7 @@ function genFood() {
   while (!valid) {
     nextX = Math.floor(Math.random() * cols);
     nextY = Math.floor(Math.random() * rows);
-    valid = !body.has(posToString([nextX, nextY]));
+    valid = !body[nextX][nextY];
   }
 
   ctx.fillStyle = foodColor;
