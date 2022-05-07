@@ -3,7 +3,7 @@ const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d", {
   alpha: false,
 }) as CanvasRenderingContext2D;
-const select = document.getElementById("difficulty") as HTMLSelectElement;
+const select = document.getElementById("mode") as HTMLSelectElement;
 
 const width = div.clientWidth;
 const height = div.clientHeight;
@@ -15,18 +15,36 @@ const headColor = "#0f5cd9";
 const blankColor = "#181818";
 const foodColor = "#4bf542";
 
-let speed = +select.value; // ms delay between each snake movement
+const mediumSpeed = 80;
+const rushStartSpeed = 120;
+const rushStopSpeed = 50;
+const rushSpeedIncrease = 1;
+const crazyFoodLen = 50;
+const normalFoodLen = 5;
+const startLen = 5; // starting length of snake
 
-let interval = setInterval(move, speed);
+let foodLen = normalFoodLen; // length gained by eating food
+let speed = +select.value; // snake move speed in ms
+
+let interval: NodeJS.Timer = setInterval(move, speed);
+let rushInterval: NodeJS.Timer;
 
 select.onchange = () => {
+  if (select.value == "rush") {
+    speed = rushStartSpeed;
+    foodLen = normalFoodLen;
+  } else if (select.value == "crazy") {
+    foodLen = crazyFoodLen;
+    speed = mediumSpeed;
+  } else {
+    foodLen = normalFoodLen;
+    speed = +select.value;
+  }
   clearInterval(interval);
-  interval = setInterval(move, +select.value);
+  interval = setInterval(move, speed);
   setup();
   select.blur();
 };
-
-const foodLen = 5; // length gained by eating food
 
 // get grid and border dimensions
 let cols = 40; // temp column count
@@ -94,6 +112,8 @@ function setup() {
   ctx.fillStyle = blankColor;
   ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
 
+  if (select.value == "rush") speed = rushStartSpeed;
+
   dirX = 0;
   dirY = 0;
   tmpX = 0;
@@ -109,7 +129,7 @@ function setup() {
   };
   tail = head;
   body[head.x][head.y] = true;
-  growLen = foodLen;
+  growLen = startLen;
   len = 1;
 
   drawSnake(head, headColor);
@@ -248,4 +268,10 @@ function genFood() {
 
   foodX = nextX;
   foodY = nextY;
+
+  if (select.value == "rush") {
+    speed = speed == rushStopSpeed ? speed : speed - rushSpeedIncrease;
+    clearInterval(interval);
+    interval = setInterval(move, speed);
+  }
 }
