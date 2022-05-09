@@ -227,6 +227,11 @@ function move() {
 
   drawSnake(head, snakeColor); // move old head color to body color
 
+  if (len == rows * cols) {
+    setup();
+    return;
+  }
+
   const next: Snake = { x: nextX, y: nextY, next: null };
   head.next = next;
   head = next;
